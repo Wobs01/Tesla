@@ -1,7 +1,7 @@
 function New-TeslaConnection {
     <#   
    .SYNOPSIS   
-   Function to connect to a SQL database
+   Function to connect to a Tesla API
        
    .DESCRIPTION 
    Opens a connection to the Tesla API or refreshes the token. Returns the password grant which can be used to follow up on other functions
