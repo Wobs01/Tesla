@@ -35,7 +35,7 @@ function New-TeslaConnection {
         
                 
     )
-    $success = $false
+    
     if ([string]::IsNullOrEmpty($credentials.UserName)) {
         try {
             $credentials = Get-Credential -Message "Please provide your Tesla credentials" -ErrorAction Stop
@@ -71,7 +71,7 @@ function New-TeslaConnection {
         $requestURI = $URL + "/oauth/token"
         $global:token = Invoke-RestMethod -Method Post -Uri $requestURI -Body $loginJSON -ContentType "application/json" -ErrorAction Stop
         Write-Host "Authentication Successfull"
-        $success = $true
+        
     }
     catch {
         throw ("Login Failed:`n"+$global:Error[0].Exception.Message)
