@@ -29,16 +29,19 @@ function New-TeslaConnection {
         [parameter(Mandatory = $false, ParameterSetName = "Refreshtoken")]
         [switch]$refresh_token,
         [parameter(Mandatory = $false)]
-        [string]$URL = "https://owner-api.teslamotors.com/" 
+        [string]$URL = "https://owner-api.teslamotors.com/",
+        [parameter(Mandatory = $false)]
+        [switch]$PassThru
         
                 
-    ) 
+    )
+    $success = $false
     if ([string]::IsNullOrEmpty($credentials.UserName)) {
         try {
             $credentials = Get-Credential -Message "Please provide your Tesla credentials" -ErrorAction Stop
         }
         catch {
-            throw ("Unable to get credentials, please try again:`n"+$global:Error[0].ToString())
+            throw ("Unable to get credentials, please try again:`n"+$global:Error[0].Exception.Message)
         }
     }
     
@@ -48,7 +51,7 @@ function New-TeslaConnection {
                 "grant_type"    = "refresh_token";
                 "client_id"     = "81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384";
                 "client_secret" = "c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3";
-                "refresh_token" = $token.refresh_token
+                "refresh_token" = $global:token.refresh_token
             }
         }
         default {
@@ -68,10 +71,14 @@ function New-TeslaConnection {
         $requestURI = $URL + "/oauth/token"
         $global:token = Invoke-RestMethod -Method Post -Uri $requestURI -Body $loginJSON -ContentType "application/json" -ErrorAction Stop
         Write-Host "Authentication Successfull"
+        $success = $true
     }
     catch {
-        ("Login Failed:`n"+$global:Error[0].ToString())
-    }    
+        throw ("Login Failed:`n"+$global:Error[0].Exception.Message)
+    }
+    if ($PassThru) {
+        return $global:token
+    }
     
 }
 
@@ -115,10 +122,36 @@ function Get-TeslaVehiclelist {
         $vehiclelist = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        throw ("Unable to get vehicle, Error message:`n"+$global:Error[0].Exception.ToString())
+        if ($global:Error[0].Exception.message -match "(401)") {
+            $validationtoken = Test-TeslaLoginToken
+            #recall function after authentication
+            if (![string]::IsNullOrEmpty($validationtoken)) {
+                $functionparameters = @{"id" = $id} 
+                Get-TeslaVehiclelist @functionparameters
+            }
+        }
+        else { 
+            throw ("Unable to get vehicle, Error message:`n"+$global:Error[0].Exception.message)
+        }
        
     }
     return $vehiclelist.response 
 }
 
-Export-ModuleMember -Function *
+function Test-TeslaLoginToken {
+    #internal function for token check
+    if ([string]::IsNullOrEmpty($global:token)) {
+        $localtoken = New-TeslaConnection -PassThru
+    }
+    else {
+        $localtoken = New-TeslaConnection -refresh_token $global:token.refresh_token -PassThru
+    }
+    return $localtoken
+}
+
+$exporthash = @{
+    "Function" = "New-TeslaConnection",
+                 "Get-TeslaVehiclelist"
+}
+
+Export-ModuleMember @exporthash
