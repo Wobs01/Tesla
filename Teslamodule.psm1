@@ -66,10 +66,11 @@ function New-TeslaConnection {
     try {
         $loginJSON = $loginhash | ConvertTo-Json
         $requestURI = $URL + "/oauth/token"
-        $global:token = Invoke-RestMethod -Method Post -Uri $requestURI -Body $loginJSON -ContentType "application/json"
+        $global:token = Invoke-RestMethod -Method Post -Uri $requestURI -Body $loginJSON -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        throw $Error[0]
+        $Error[0].Exception | out-host
+        write-error $Error[0].Exception
     }    
     
 }
@@ -82,14 +83,17 @@ function Get-TeslaVehiclelist {
         [string]$URL = "https://owner-api.teslamotors.com/" 
     )
     
+    
     $header = @{"Authorization" = "Bearer $($token.access_token)"}
     
+
     try {        
         $requestURI = $URL + "api/1/vehicles/$id"
-        $vehiclelist = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json"
+        $vehiclelist = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        throw $Error[1]
+        throw ("Unable to get vehicle, Error message:`n"+$global:Error[0].Exception | Out-String)
+       
     }
     return $vehiclelist.response 
 }
