@@ -131,12 +131,69 @@ function Get-TeslaVehiclelist {
             }
         }
         else { 
-            throw ("Unable to get vehicle, Error message:`n"+$global:Error[0].Exception.message)
+            throw ("Unable to get vehicle list, Error message:`n"+$global:Error[0].Exception.message)
         }
        
     }
     return $vehiclelist.response 
 }
+
+function Get-TeslaVehicleData {
+    <#   
+   .SYNOPSIS   
+   Function to get vehicle data from the Tesla API
+       
+   .DESCRIPTION 
+   List the vehicle date for the logged in account, a vehicle id must be specified
+
+   .NOTES	
+       Author: Robin Verhoeven
+       Requestor: -
+       Created: -
+       
+       
+
+   .LINK
+       https://github.com/Wobs01/Tesla
+
+   .EXAMPLE   
+   . Get-TeslaVehicleData -id <id>
+   
+
+   #>
+    
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id,
+        [parameter(Mandatory = $false)]
+        [string]$URL = "https://owner-api.teslamotors.com/" 
+    )
+    
+    
+    $header = @{"Authorization" = "Bearer $($token.access_token)"}
+    
+
+    try {        
+        $requestURI = $URL + "api/1/vehicles/$id/vehicle_data"
+        $vehicledata = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+    }
+    catch {
+        if ($global:Error[0].Exception.message -match "(401)") {
+            $validationtoken = Test-TeslaLoginToken
+            #recall function after authentication
+            if (![string]::IsNullOrEmpty($validationtoken)) {
+                $functionparameters = @{"id" = $id} 
+                Get-TeslaVehiclelist @functionparameters
+            }
+        }
+        else { 
+            throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
+        }
+       
+    }
+    return $vehicledate.response 
+}
+
 
 function Test-TeslaLoginToken {
     #internal function for token check
