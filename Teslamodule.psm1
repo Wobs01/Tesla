@@ -191,7 +191,7 @@ function Get-TeslaVehicleData {
         }
        
     }
-    return $vehicledate.response 
+    return $vehicledata.response 
 }
 
 
@@ -208,7 +208,8 @@ function Test-TeslaLoginToken {
 
 $exporthash = @{
     "Function" = "New-TeslaConnection",
-                 "Get-TeslaVehiclelist"
+                 "Get-TeslaVehiclelist",
+                 "Get-TeslaVehicleData"
 }
 
 Export-ModuleMember @exporthash
