@@ -178,15 +178,8 @@ function Get-TeslaVehicleData {
         $vehicledata = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        if ($global:Error[0].Exception.message -match "(401)") {
-            $validationtoken = Test-TeslaLoginToken
-            #recall function after authentication
-            if (![string]::IsNullOrEmpty($validationtoken)) {
-                $functionparameters = @{"id" = $id} 
-                Get-TeslaVehiclelist @functionparameters
-            }
-        }
-        else { 
+        
+        if (!(Start-TeslaErrorHandling -functionname "Get-TeslaVehicleData" -functionparameters $PSBoundParameters)) { 
             throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
         }
        
@@ -194,6 +187,33 @@ function Get-TeslaVehicleData {
     return $vehicledata.response 
 }
 
+function Start-TeslaErrorHandling {
+    #internal function for Error handling
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$functionname,
+        [parameter(Mandatory = $false)]
+        $functionparameters
+    )
+    switch -Regex ($global:Error[0].Exception.message) {
+        "(401)" {
+            $validationtoken = Test-TeslaLoginToken
+            #recall function after authentication
+            if (![string]::IsNullOrEmpty($validationtoken)) {                 
+                . $functionname @functionparameters
+            }
+        }
+        "(408)" {
+            Send-TeslaWakeUpCall @functionparameters
+            #recall function
+            . $functionname @functionparameters
+        }
+        default {
+            return $false
+        }
+    }
+
+}
 
 function Test-TeslaLoginToken {
     #internal function for token check
@@ -204,6 +224,27 @@ function Test-TeslaLoginToken {
         $localtoken = New-TeslaConnection -refresh_token $global:token.refresh_token -PassThru
     }
     return $localtoken
+}
+
+function Send-TeslaWakeUpCall {
+    #internal function to connect to tesla or wake vehicle
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id,
+        [parameter(Mandatory = $false)]
+        [string]$URL = "https://owner-api.teslamotors.com/" 
+    )
+     
+    $header = @{"Authorization" = "Bearer $($token.access_token)"}
+   
+    try {        
+        $requestURI = $URL + "/api/1/vehicles/$id/wake_up"
+        $global:vehiclestatus = Invoke-RestMethod -Method Post -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+    }
+    catch {
+        throw ("Unable to wake vehicle, Error message:`n"+$global:Error[0].Exception.message)
+    }
+
 }
 
 $exporthash = @{
