@@ -122,16 +122,8 @@ function Get-TeslaVehiclelist {
         $vehiclelist = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        if ($global:Error[0].Exception.message -match "(401)") {
-            $validationtoken = Test-TeslaLoginToken
-            #recall function after authentication
-            if (![string]::IsNullOrEmpty($validationtoken)) {
-                $functionparameters = @{"id" = $id} 
-                Get-TeslaVehiclelist @functionparameters
-            }
-        }
-        else { 
-            throw ("Unable to get vehicle list, Error message:`n"+$global:Error[0].Exception.message)
+        if (!(Start-TeslaErrorHandling -functionname "Get-TeslaVehiclelist" -functionparameters $PSBoundParameters)) { 
+            throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
         }
        
     }
