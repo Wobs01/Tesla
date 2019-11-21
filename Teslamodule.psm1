@@ -224,14 +224,22 @@ function Send-TeslaWakeUpCall {
     param([parameter(Mandatory = $true)]
         [string]$id,
         [parameter(Mandatory = $false)]
-        [string]$URL = "https://owner-api.teslamotors.com/" 
+        [string]$URL = "https://owner-api.teslamotors.com/",
+        [parameter(Mandatory = $false)]
+        [int]$TimeoutSec = 5 
     )
      
     $header = @{"Authorization" = "Bearer $($token.access_token)"}
    
     try {        
         $requestURI = $URL + "/api/1/vehicles/$id/wake_up"
-        $global:vehiclestatus = Invoke-RestMethod -Method Post -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+        
+        $i = 1
+        do {
+            $global:vehiclestatus = Invoke-RestMethod -Method Post -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+            Start-Sleep -Milliseconds 500
+            $i++
+        } while (($i -lt ($TimeoutSec * 2)) -or ($global:vehiclestatus.response.state -eq "online"))
     }
     catch {
         throw ("Unable to wake vehicle, Error message:`n"+$global:Error[0].Exception.message)
