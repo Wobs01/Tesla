@@ -122,8 +122,12 @@ function Get-TeslaVehiclelist {
         $vehiclelist = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        if (!(Start-TeslaErrorHandling -functionname "Get-TeslaVehiclelist" -functionparameters $PSBoundParameters)) { 
+        $response = Start-TeslaErrorHandling -functionname "Get-TeslaVehicleList" -functionparameters $PSBoundParameters
+        if ($response -eq $false) { 
             throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
+        }
+        else {
+            return $response
         }
        
     }
@@ -170,9 +174,12 @@ function Get-TeslaVehicleData {
         $vehicledata = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
     }
     catch {
-        
-        if (!(Start-TeslaErrorHandling -functionname "Get-TeslaVehicleData" -functionparameters $PSBoundParameters)) { 
+        $response = Start-TeslaErrorHandling -functionname "Get-TeslaVehicleData" -functionparameters $PSBoundParameters
+        if ($response -eq $false) { 
             throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
+        }
+        else {
+            return $response
         }
        
     }
@@ -192,13 +199,15 @@ function Start-TeslaErrorHandling {
             $validationtoken = Test-TeslaLoginToken
             #recall function after authentication
             if (![string]::IsNullOrEmpty($validationtoken)) {                 
-                . $functionname @functionparameters
+               $returnvalue =  . $functionname @functionparameters
+               return $returnvalue
             }
         }
         "(408)" {
             Send-TeslaWakeUpCall @functionparameters
             #recall function
-            . $functionname @functionparameters
+            $returnvalue = . $functionname @functionparameters
+            return $returnvalue
         }
         default {
             return $false
@@ -233,7 +242,7 @@ function Send-TeslaWakeUpCall {
    
     try {        
         $requestURI = $URL + "/api/1/vehicles/$id/wake_up"
-        
+        Write-Host waking up vehicle $id
         $i = 1
         do {
             $global:vehiclestatus = Invoke-RestMethod -Method Post -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
