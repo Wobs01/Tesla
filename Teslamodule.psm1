@@ -41,7 +41,7 @@ function New-TeslaConnection {
             $credentials = Get-Credential -Message "Please provide your Tesla credentials" -ErrorAction Stop
         }
         catch {
-            throw ("Unable to get credentials, please try again:`n"+$global:Error[0].Exception.Message)
+            throw ("Unable to get credentials, please try again:`n" + $global:Error[0].Exception.Message)
         }
     }
     
@@ -74,7 +74,7 @@ function New-TeslaConnection {
         
     }
     catch {
-        throw ("Login Failed:`n"+$global:Error[0].Exception.Message)
+        throw ("Login Failed:`n" + $global:Error[0].Exception.Message)
     }
     if ($PassThru) {
         return $global:token
@@ -114,7 +114,7 @@ function Get-TeslaVehiclelist {
     )
     
     
-    $header = @{"Authorization" = "Bearer $($token.access_token)"}
+    $header = @{"Authorization" = "Bearer $($token.access_token)" }
     
 
     try {        
@@ -124,7 +124,7 @@ function Get-TeslaVehiclelist {
     catch {
         $response = Start-TeslaErrorHandling -functionname "Get-TeslaVehicleList" -functionparameters $PSBoundParameters
         if ($response -eq $false) { 
-            throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
+            throw ("Unable to get vehicle data, Error message:`n" + $global:Error[0].Exception.message)
         }
         else {
             return $response
@@ -166,7 +166,7 @@ function Get-TeslaVehicleData {
     )
     
     
-    $header = @{"Authorization" = "Bearer $($token.access_token)"}
+    $header = @{"Authorization" = "Bearer $($token.access_token)" }
     
 
     try {        
@@ -176,7 +176,80 @@ function Get-TeslaVehicleData {
     catch {
         $response = Start-TeslaErrorHandling -functionname "Get-TeslaVehicleData" -functionparameters $PSBoundParameters
         if ($response -eq $false) { 
-            throw ("Unable to get vehicle data, Error message:`n"+$global:Error[0].Exception.message)
+            throw ("Unable to get vehicle data, Error message:`n" + $global:Error[0].Exception.message)
+        }
+        else {
+            return $response
+        }
+       
+    }
+    return $vehicledata.response 
+}
+
+function Get-TeslaChargeState {
+    <#   
+   .SYNOPSIS   
+   Function to get vehicle charge state from the Tesla API
+       
+   .DESCRIPTION 
+   Get charge state for the vehicle, a vehicle id must be specified
+
+   .NOTES	
+       Author: Robin Verhoeven
+       Requestor: -
+       Created: -
+       
+       
+
+   .LINK
+       https://github.com/Wobs01/Tesla
+
+   .EXAMPLE   
+   . Get-TeslaChargeState -id <id>
+   
+
+   #>
+    
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id      
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/charge_state"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
+   
+    $vehicledata = New-TeslaAPICall @APIparameters
+   
+    return $vehicledata
+   
+}
+
+function New-TeslaAPICall {
+    #internal function for API calls
+    [Cmdletbinding()] 
+    param(
+        [parameter(Mandatory = $true)]
+        [string]$URI,
+        [parameter(Mandatory = $true)]
+        [validateset('GET', 'PUT')]
+        $method,
+        [parameter(Mandatory = $false)]
+        [string]$functionname,
+        [parameter(Mandatory = $false)]
+        $functionparameters
+    )
+    $header = @{"Authorization" = "Bearer $($token.access_token)" }
+    try {     
+        $vehicledata = Invoke-RestMethod -Method $method -Uri $URI -Headers $header -ContentType "application/json" -ErrorAction Stop
+    }
+    catch {
+        $response = Start-TeslaErrorHandling -functionname $functionname -functionparameters $functionparameters
+        if ($response -eq $false) { 
+            throw ("Unable to execute $functionname, Error message:`n" + $global:Error[0].Exception.message)
         }
         else {
             return $response
@@ -199,8 +272,8 @@ function Start-TeslaErrorHandling {
             $validationtoken = Test-TeslaLoginToken
             #recall function after authentication
             if (![string]::IsNullOrEmpty($validationtoken)) {                 
-               $returnvalue =  . $functionname @functionparameters
-               return $returnvalue
+                $returnvalue = . $functionname @functionparameters
+                return $returnvalue
             }
         }
         "(408)" {
@@ -238,7 +311,7 @@ function Send-TeslaWakeUpCall {
         [int]$TimeoutSec = 5 
     )
      
-    $header = @{"Authorization" = "Bearer $($token.access_token)"}
+    $header = @{"Authorization" = "Bearer $($token.access_token)" }
    
     try {        
         $requestURI = $URL + "/api/1/vehicles/$id/wake_up"
@@ -251,15 +324,16 @@ function Send-TeslaWakeUpCall {
         } while (($i -lt ($TimeoutSec * 2)) -or ($global:vehiclestatus.response.state -eq "online"))
     }
     catch {
-        throw ("Unable to wake vehicle, Error message:`n"+$global:Error[0].Exception.message)
+        throw ("Unable to wake vehicle, Error message:`n" + $global:Error[0].Exception.message)
     }
 
 }
 
 $exporthash = @{
     "Function" = "New-TeslaConnection",
-                 "Get-TeslaVehiclelist",
-                 "Get-TeslaVehicleData"
+    "Get-TeslaVehiclelist",
+    "Get-TeslaVehicleData",
+    "Get-TeslaChargeState"
 }
 
 Export-ModuleMember @exporthash
