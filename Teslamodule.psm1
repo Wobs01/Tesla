@@ -108,30 +108,20 @@ function Get-TeslaVehiclelist {
     
     [Cmdletbinding()] 
     param([parameter(Mandatory = $false)]
-        [string]$id,
-        [parameter(Mandatory = $false)]
-        [string]$URL = "https://owner-api.teslamotors.com/" 
-    )
-    
-    
-    $header = @{"Authorization" = "Bearer $($token.access_token)" }
-    
+        [string]$id         
+    )    
 
-    try {        
-        $requestURI = $URL + "api/1/vehicles/$id"
-        $vehiclelist = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id"
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
     }
-    catch {
-        $response = Start-TeslaErrorHandling -functionname "Get-TeslaVehicleList" -functionparameters $PSBoundParameters
-        if ($response -eq $false) { 
-            throw ("Unable to get vehicle data, Error message:`n" + $global:Error[0].Exception.message)
-        }
-        else {
-            return $response
-        }
-       
-    }
-    return $vehiclelist.response 
+   
+    $vehicledata = New-TeslaAPICall @APIparameters
+   
+    return $vehicledata    
 }
 
 function Get-TeslaVehicleData {
@@ -160,30 +150,20 @@ function Get-TeslaVehicleData {
     
     [Cmdletbinding()] 
     param([parameter(Mandatory = $true)]
-        [string]$id,
-        [parameter(Mandatory = $false)]
-        [string]$URL = "https://owner-api.teslamotors.com/" 
+        [string]$id
     )
-    
-    
-    $header = @{"Authorization" = "Bearer $($token.access_token)" }
-    
-
-    try {        
-        $requestURI = $URL + "api/1/vehicles/$id/vehicle_data"
-        $vehicledata = Invoke-RestMethod -Method Get -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+    $requestURI ="https://owner-api.teslamotors.com/api/1/vehicles/$id/vehicle_data"
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
     }
-    catch {
-        $response = Start-TeslaErrorHandling -functionname "Get-TeslaVehicleData" -functionparameters $PSBoundParameters
-        if ($response -eq $false) { 
-            throw ("Unable to get vehicle data, Error message:`n" + $global:Error[0].Exception.message)
-        }
-        else {
-            return $response
-        }
-       
-    }
-    return $vehicledata.response 
+   
+    $vehicledata = New-TeslaAPICall @APIparameters
+   
+    return $vehicledata    
+    
 }
 
 function Get-TeslaChargeState {
@@ -226,6 +206,47 @@ function Get-TeslaChargeState {
    
     return $vehicledata
    
+}
+
+function Get-TeslaClimateState {
+     <#   
+   .SYNOPSIS   
+   Function to get vehicle climate state from the Tesla API
+       
+   .DESCRIPTION 
+   Get climate state for the vehicle, a vehicle id must be specified
+
+   .NOTES	
+       Author: Robin Verhoeven
+       Requestor: -
+       Created: -
+       
+       
+
+   .LINK
+       https://github.com/Wobs01/Tesla
+
+   .EXAMPLE   
+   . Get-TeslaClimateState -id <id>
+   
+
+   #>
+    
+   [Cmdletbinding()] 
+   param([parameter(Mandatory = $true)]
+       [string]$id      
+   )  
+   $requestURI = "https://owner-api.teslamotors.com//api/1/vehicles/$id/data_request/climate_state"       
+   $APIparameters = @{
+       "URI"                = $requestURI;
+       "method"             = "GET";
+       "functionname"       = $MyInvocation.MyCommand;
+       "functionparameters" = $PSBoundParameters
+   }
+  
+   $vehicledata = New-TeslaAPICall @APIparameters
+  
+   return $vehicledata
 }
 
 function New-TeslaAPICall {
@@ -333,7 +354,8 @@ $exporthash = @{
     "Function" = "New-TeslaConnection",
     "Get-TeslaVehiclelist",
     "Get-TeslaVehicleData",
-    "Get-TeslaChargeState"
+    "Get-TeslaChargeState",
+    "Get-TeslaClimateState"
 }
 
 Export-ModuleMember @exporthash
