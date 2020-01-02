@@ -256,7 +256,7 @@ function New-TeslaAPICall {
         [parameter(Mandatory = $true)]
         [string]$URI,
         [parameter(Mandatory = $true)]
-        [validateset('GET', 'PUT')]
+        [validateset('GET', 'POST')]
         $method,
         [parameter(Mandatory = $false)]
         [string]$functionname,
@@ -358,4 +358,4 @@ $exporthash = @{
     "Get-TeslaClimateState"
 }
 
-Export-ModuleMember @exporthash
+Export-ModuleMember @exporthash 
