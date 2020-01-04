@@ -192,7 +192,9 @@ function Get-TeslaChargeState {
     
     [Cmdletbinding()] 
     param([parameter(Mandatory = $true)]
-        [string]$id      
+        [string]$id,
+        [parameter(Mandatory = $false)]
+        [switch]$continious     
     )  
     $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/charge_state"       
     $APIparameters = @{
@@ -203,7 +205,18 @@ function Get-TeslaChargeState {
     }
    
     $vehicledata = New-TeslaAPICall @APIparameters
-   
+    if ($continious) {
+        do {
+            try {
+                Write-Progress -Activity "Percent Charged $($vehicledata.battery_level)" -Status $vehicledata.charging_state -PercentComplete $vehicledata.battery_level
+            }
+            catch {
+                throw ("Unable to show vehicle charge state, Error message:`n" + $global:Error[0].Exception.message)
+            }
+            Start-Sleep 1
+            $vehicledata = New-TeslaAPICall @APIparameters
+        } while ($vehicledata.charging_state -eq "Charging")
+    }
     return $vehicledata
    
 }
@@ -236,7 +249,7 @@ function Get-TeslaClimateState {
    param([parameter(Mandatory = $true)]
        [string]$id      
    )  
-   $requestURI = "https://owner-api.teslamotors.com//api/1/vehicles/$id/data_request/climate_state"       
+   $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/climate_state"       
    $APIparameters = @{
        "URI"                = $requestURI;
        "method"             = "GET";
@@ -247,6 +260,88 @@ function Get-TeslaClimateState {
    $vehicledata = New-TeslaAPICall @APIparameters
   
    return $vehicledata
+}
+
+function Get-TeslaDriveState {
+    <#   
+  .SYNOPSIS   
+  Function to get vehicle drive state from the Tesla API
+      
+  .DESCRIPTION 
+  Get drive state for the vehicle, a vehicle id must be specified
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . Get-TeslaDriveState -id <id>
+  
+
+  #>
+   
+  [Cmdletbinding()] 
+  param([parameter(Mandatory = $true)]
+      [string]$id      
+  )  
+  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/drive_state"       
+  $APIparameters = @{
+      "URI"                = $requestURI;
+      "method"             = "GET";
+      "functionname"       = $MyInvocation.MyCommand;
+      "functionparameters" = $PSBoundParameters
+  }
+ 
+  $vehicledata = New-TeslaAPICall @APIparameters
+ 
+  return $vehicledata
+}
+
+function Get-TeslaGUISettings {
+    <#   
+  .SYNOPSIS   
+  Function to get vehicle GUI settings from the Tesla API
+      
+  .DESCRIPTION 
+  Get the GUI settings state for the vehicle, a vehicle id must be specified
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . Get-TeslaGUISettings -id <id>
+  
+
+  #>
+   
+  [Cmdletbinding()] 
+  param([parameter(Mandatory = $true)]
+      [string]$id      
+  )  
+  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/gui_settings"       
+  $APIparameters = @{
+      "URI"                = $requestURI;
+      "method"             = "GET";
+      "functionname"       = $MyInvocation.MyCommand;
+      "functionparameters" = $PSBoundParameters
+  }
+ 
+  $vehicledata = New-TeslaAPICall @APIparameters
+ 
+  return $vehicledata
 }
 
 function New-TeslaAPICall {
