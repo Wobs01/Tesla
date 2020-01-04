@@ -344,6 +344,133 @@ function Get-TeslaGUISettings {
   return $vehicledata
 }
 
+function Get-TeslaVehicleConfig {
+    <#   
+  .SYNOPSIS   
+  Function to get vehicle config from the Tesla API
+      
+  .DESCRIPTION 
+  Get the config for the vehicle, a vehicle id must be specified
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . Get-TeslaVehicleConfig -id <id>
+  
+
+  #>
+   
+  [Cmdletbinding()] 
+  param([parameter(Mandatory = $true)]
+      [string]$id      
+  )  
+  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/vehicle_config"       
+  $APIparameters = @{
+      "URI"                = $requestURI;
+      "method"             = "GET";
+      "functionname"       = $MyInvocation.MyCommand;
+      "functionparameters" = $PSBoundParameters
+  }
+ 
+  $vehicledata = New-TeslaAPICall @APIparameters
+ 
+  return $vehicledata
+}
+
+function Get-TeslaNearbyChargeSites {
+    <#   
+  .SYNOPSIS   
+  Function to get charging sites from the Tesla API
+      
+  .DESCRIPTION 
+  Get the nearby charging sites for the vehicle, based on the vehicle location. 
+  A vehicle id must be specified
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . Get-TeslaNearbyChargeSites -id <id>
+  
+
+  #>
+   
+  [Cmdletbinding()] 
+  param([parameter(Mandatory = $true)]
+      [string]$id      
+  )  
+  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/nearby_charging_sites"       
+  $APIparameters = @{
+      "URI"                = $requestURI;
+      "method"             = "GET";
+      "functionname"       = $MyInvocation.MyCommand;
+      "functionparameters" = $PSBoundParameters
+  }
+ 
+  $vehicledata = New-TeslaAPICall @APIparameters
+ 
+  return $vehicledata
+}
+
+function Start-TeslaSoftwareUpdate {
+    <#   
+  .SYNOPSIS   
+  Function to start a software update if available, sends a post command to the Tesla API
+      
+  .DESCRIPTION 
+  Get the nearby charging sites for the vehicle, based on the vehicle location. 
+  A vehicle id must be specified
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . Start-TeslaSoftwareUpdate -id <id> -offset <offset in seconds>
+  
+
+  #>
+   
+  [Cmdletbinding()] 
+  param([parameter(Mandatory = $true)]
+      [string]$id,
+      [parameter(Mandatory = $true)]
+      [int]$offset     
+  )  
+  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/command/schedule_software_update?offset_sec=$offset"       
+  $APIparameters = @{
+      "URI"                = $requestURI;
+      "method"             = "POST";
+      "functionname"       = $MyInvocation.MyCommand;
+      "functionparameters" = $PSBoundParameters
+  }
+ 
+  $vehicledata = New-TeslaAPICall @APIparameters
+ 
+  return $vehicledata
+}
+
 function New-TeslaAPICall {
     #internal function for API calls
     [Cmdletbinding()] 
@@ -450,7 +577,12 @@ $exporthash = @{
     "Get-TeslaVehiclelist",
     "Get-TeslaVehicleData",
     "Get-TeslaChargeState",
-    "Get-TeslaClimateState"
+    "Get-TeslaClimateState",
+    "Get-TeslaDriveState",
+    "Get-TeslaGUISettings",
+    "Get-TeslaVehicleConfig",
+    "Get-TeslaNearbyChargeSites",
+    "Start-TeslaSoftwareUpdate"
 }
 
 Export-ModuleMember @exporthash 
