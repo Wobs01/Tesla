@@ -152,7 +152,7 @@ function Get-TeslaVehicleData {
     param([parameter(Mandatory = $true)]
         [string]$id
     )
-    $requestURI ="https://owner-api.teslamotors.com/api/1/vehicles/$id/vehicle_data"
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/vehicle_data"
     $APIparameters = @{
         "URI"                = $requestURI;
         "method"             = "GET";
@@ -222,7 +222,7 @@ function Get-TeslaChargeState {
 }
 
 function Get-TeslaClimateState {
-     <#   
+    <#   
    .SYNOPSIS   
    Function to get vehicle climate state from the Tesla API
        
@@ -245,21 +245,21 @@ function Get-TeslaClimateState {
 
    #>
     
-   [Cmdletbinding()] 
-   param([parameter(Mandatory = $true)]
-       [string]$id      
-   )  
-   $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/climate_state"       
-   $APIparameters = @{
-       "URI"                = $requestURI;
-       "method"             = "GET";
-       "functionname"       = $MyInvocation.MyCommand;
-       "functionparameters" = $PSBoundParameters
-   }
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id      
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/climate_state"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
   
-   $vehicledata = New-TeslaAPICall @APIparameters
+    $vehicledata = New-TeslaAPICall @APIparameters
   
-   return $vehicledata
+    return $vehicledata
 }
 
 function Get-TeslaDriveState {
@@ -286,21 +286,21 @@ function Get-TeslaDriveState {
 
   #>
    
-  [Cmdletbinding()] 
-  param([parameter(Mandatory = $true)]
-      [string]$id      
-  )  
-  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/drive_state"       
-  $APIparameters = @{
-      "URI"                = $requestURI;
-      "method"             = "GET";
-      "functionname"       = $MyInvocation.MyCommand;
-      "functionparameters" = $PSBoundParameters
-  }
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id      
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/drive_state"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
  
-  $vehicledata = New-TeslaAPICall @APIparameters
+    $vehicledata = New-TeslaAPICall @APIparameters
  
-  return $vehicledata
+    return $vehicledata
 }
 
 function Get-TeslaGUISettings {
@@ -327,21 +327,21 @@ function Get-TeslaGUISettings {
 
   #>
    
-  [Cmdletbinding()] 
-  param([parameter(Mandatory = $true)]
-      [string]$id      
-  )  
-  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/gui_settings"       
-  $APIparameters = @{
-      "URI"                = $requestURI;
-      "method"             = "GET";
-      "functionname"       = $MyInvocation.MyCommand;
-      "functionparameters" = $PSBoundParameters
-  }
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id      
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/gui_settings"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
  
-  $vehicledata = New-TeslaAPICall @APIparameters
+    $vehicledata = New-TeslaAPICall @APIparameters
  
-  return $vehicledata
+    return $vehicledata
 }
 
 function Get-TeslaVehicleConfig {
@@ -368,21 +368,21 @@ function Get-TeslaVehicleConfig {
 
   #>
    
-  [Cmdletbinding()] 
-  param([parameter(Mandatory = $true)]
-      [string]$id      
-  )  
-  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/vehicle_config"       
-  $APIparameters = @{
-      "URI"                = $requestURI;
-      "method"             = "GET";
-      "functionname"       = $MyInvocation.MyCommand;
-      "functionparameters" = $PSBoundParameters
-  }
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id      
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/data_request/vehicle_config"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
  
-  $vehicledata = New-TeslaAPICall @APIparameters
+    $vehicledata = New-TeslaAPICall @APIparameters
  
-  return $vehicledata
+    return $vehicledata
 }
 
 function Get-TeslaNearbyChargeSites {
@@ -410,21 +410,21 @@ function Get-TeslaNearbyChargeSites {
 
   #>
    
-  [Cmdletbinding()] 
-  param([parameter(Mandatory = $true)]
-      [string]$id      
-  )  
-  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/nearby_charging_sites"       
-  $APIparameters = @{
-      "URI"                = $requestURI;
-      "method"             = "GET";
-      "functionname"       = $MyInvocation.MyCommand;
-      "functionparameters" = $PSBoundParameters
-  }
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id      
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/nearby_charging_sites"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "GET";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
  
-  $vehicledata = New-TeslaAPICall @APIparameters
+    $vehicledata = New-TeslaAPICall @APIparameters
  
-  return $vehicledata
+    return $vehicledata
 }
 
 function Start-TeslaSoftwareUpdate {
@@ -433,8 +433,7 @@ function Start-TeslaSoftwareUpdate {
   Function to start a software update if available, sends a post command to the Tesla API
       
   .DESCRIPTION 
-  Get the nearby charging sites for the vehicle, based on the vehicle location. 
-  A vehicle id must be specified
+  Starts a software update, with the selected offset.
 
   .NOTES	
       Author: Robin Verhoeven
@@ -452,23 +451,75 @@ function Start-TeslaSoftwareUpdate {
 
   #>
    
-  [Cmdletbinding()] 
-  param([parameter(Mandatory = $true)]
-      [string]$id,
-      [parameter(Mandatory = $true)]
-      [int]$offset     
-  )  
-  $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/command/schedule_software_update?offset_sec=$offset"       
-  $APIparameters = @{
-      "URI"                = $requestURI;
-      "method"             = "POST";
-      "functionname"       = $MyInvocation.MyCommand;
-      "functionparameters" = $PSBoundParameters
-  }
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id,
+        [parameter(Mandatory = $true)]
+        [int]$offset     
+    )  
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/command/schedule_software_update?offset_sec=$offset"       
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "POST";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
  
-  $vehicledata = New-TeslaAPICall @APIparameters
+    $vehicledata = New-TeslaAPICall @APIparameters
  
-  return $vehicledata
+    return $vehicledata
+}
+
+function New-TeslaAlert {
+    <#   
+  .SYNOPSIS   
+  Function to initiate an alarm, sends a post command to the Tesla API
+      
+  .DESCRIPTION 
+  Starts an alarm on the Tesla, Either flashing the lights or honking the horn.
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . New-TeslaAlert -id <id> -Alert FlashLights
+  
+
+  #>
+   
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id,
+        [parameter(Mandatory = $true)]
+        [validateset('HonkHorn', 'FlashLights')]$Alert
+
+    )
+    switch ($Alert) {
+        "HonkHorn" {
+            $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/api/1/vehicles/{id}/command/honk_horn"
+        }
+        "FlashLights" {
+            $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/api/1/vehicles/{id}/command/flash_lights"
+        }
+    }
+         
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "POST";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters
+    }
+ 
+    $vehicledata = New-TeslaAPICall @APIparameters
+ 
+    return $vehicledata
 }
 
 function New-TeslaAPICall {
