@@ -38,7 +38,7 @@ function New-TeslaConnection {
     
     if ([string]::IsNullOrEmpty($credentials.UserName)) {
         try {
-            $credentials = Get-Credential -Message "Please provide your Tesla credentials" -ErrorAction Stop
+            $global:credentials = Get-Credential -Message "Please provide your Tesla credentials" -ErrorAction Stop
         }
         catch {
             throw ("Unable to get credentials, please try again:`n" + $global:Error[0].Exception.Message)
@@ -59,8 +59,8 @@ function New-TeslaConnection {
                 "grant_type"    = "password";
                 "client_id"     = "81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384";
                 "client_secret" = "c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3";
-                "email"         = $credentials.UserName;
-                "password"      = $credentials.GetNetworkCredential().password;
+                "email"         = $global:credentials.UserName;
+                "password"      = $global:credentials.GetNetworkCredential().password;
             }
         }
     }
@@ -343,7 +343,6 @@ function Get-TeslaGUISettings {
  
     return $vehicledata
 }
-
 function Get-TeslaVehicleConfig {
     <#   
   .SYNOPSIS   
@@ -384,7 +383,6 @@ function Get-TeslaVehicleConfig {
  
     return $vehicledata
 }
-
 function Get-TeslaNearbyChargeSites {
     <#   
   .SYNOPSIS   
@@ -426,7 +424,6 @@ function Get-TeslaNearbyChargeSites {
  
     return $vehicledata
 }
-
 function Start-TeslaSoftwareUpdate {
     <#   
   .SYNOPSIS   
@@ -469,8 +466,7 @@ function Start-TeslaSoftwareUpdate {
  
     return $vehicledata
 }
-
-function New-TeslaAlert {
+function Invoke-TeslaAlert {
     <#   
   .SYNOPSIS   
   Function to initiate an alarm, sends a post command to the Tesla API
@@ -503,10 +499,10 @@ function New-TeslaAlert {
     )
     switch ($Alert) {
         "HonkHorn" {
-            $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/api/1/vehicles/{id}/command/honk_horn"
+            $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/command/honk_horn"
         }
         "FlashLights" {
-            $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/api/1/vehicles/{id}/command/flash_lights"
+            $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/command/flash_lights"
         }
     }
          
@@ -515,6 +511,53 @@ function New-TeslaAlert {
         "method"             = "POST";
         "functionname"       = $MyInvocation.MyCommand;
         "functionparameters" = $PSBoundParameters
+    }
+ 
+    $vehicledata = New-TeslaAPICall @APIparameters
+ 
+    return $vehicledata
+}
+
+function Invoke-TeslaRemoteStart {
+    <#   
+  .SYNOPSIS   
+  Function to initiate a remote start, sends a post command to the Tesla API
+      
+  .DESCRIPTION 
+  Sends an authorization for an remote start, which lasts for two minutes.
+
+  .NOTES	
+      Author: Robin Verhoeven
+      Requestor: -
+      Created: -
+      
+      
+
+  .LINK
+      https://github.com/Wobs01/Tesla
+
+  .EXAMPLE   
+  . Invoke-TeslaRemoteStart -id <id>
+  
+
+  #>
+   
+    [Cmdletbinding()] 
+    param([parameter(Mandatory = $true)]
+        [string]$id       
+
+    )
+    
+    $requestURI = "https://owner-api.teslamotors.com/api/1/vehicles/$id/command/remote_start_drive"
+    $bodyhash = @{        
+        "password" = $global:credentials.GetNetworkCredential().password;
+    }     
+    $APIparameters = @{
+        "URI"                = $requestURI;
+        "method"             = "POST";
+        "functionname"       = $MyInvocation.MyCommand;
+        "functionparameters" = $PSBoundParameters;
+        "Body" = ($bodyhash | ConvertTo-Json)
     }
  
     $vehicledata = New-TeslaAPICall @APIparameters
@@ -534,11 +577,23 @@ function New-TeslaAPICall {
         [parameter(Mandatory = $false)]
         [string]$functionname,
         [parameter(Mandatory = $false)]
-        $functionparameters
+        $functionparameters,
+        [parameter(Mandatory = $false)]
+        $Body
     )
     $header = @{"Authorization" = "Bearer $($token.access_token)" }
+    $RESTparameters = @{
+        "Method" = $method;
+        "Uri" = $URI;
+        "Headers" = $header;
+        "ContentType" = "application/json";
+        "ErrorAction" = "Stop"
+    }
+    if ($PSBoundParameters.ContainsKey('Body')) {
+        $RESTparameters.Add("Body",$Body)
+    }
     try {     
-        $vehicledata = Invoke-RestMethod -Method $method -Uri $URI -Headers $header -ContentType "application/json" -ErrorAction Stop
+        $vehicledata = Invoke-RestMethod @RESTparameters
     }
     catch {
         $response = Start-TeslaErrorHandling -functionname $functionname -functionparameters $functionparameters
@@ -552,7 +607,6 @@ function New-TeslaAPICall {
     }
     return $vehicledata.response 
 }
-
 function Start-TeslaErrorHandling {
     #internal function for Error handling
     [Cmdletbinding()] 
@@ -633,7 +687,9 @@ $exporthash = @{
     "Get-TeslaGUISettings",
     "Get-TeslaVehicleConfig",
     "Get-TeslaNearbyChargeSites",
-    "Start-TeslaSoftwareUpdate"
+    "Start-TeslaSoftwareUpdate",
+    "Invoke-TeslaAlert",
+    "Invoke-TeslaRemoteStart"
 }
 
 Export-ModuleMember @exporthash 
