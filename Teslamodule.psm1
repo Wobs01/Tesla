@@ -667,9 +667,10 @@ function Send-TeslaWakeUpCall {
         $i = 1
         do {
             $global:vehiclestatus = Invoke-RestMethod -Method Post -Uri $requestURI -Headers $header -ContentType "application/json" -ErrorAction Stop
+            write-host status of vehicle is $global:vehiclestatus.response.state
             Start-Sleep -Milliseconds 500
             $i++
-        } while (($i -lt ($TimeoutSec * 2)) -or ($global:vehiclestatus.response.state -eq "online"))
+        } while (($i -lt ($TimeoutSec * 2)) -or -not($global:vehiclestatus.response.state -eq "online"))
     }
     catch {
         throw ("Unable to wake vehicle, Error message:`n" + $global:Error[0].Exception.message)
